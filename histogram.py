@@ -9,12 +9,10 @@ if __name__ == '__main__':
     dataset = tools.read_dataset(args['dataset_path'])
     houses = ['Slytherin', 'Gryffindor', 'Ravenclaw', 'Hufflepuff']
     houses_dfs = {}
-    scaler = tools.StandartScaler()
     sns.set_style('darkgrid')
     for house in houses:
         df = dataset[dataset['Hogwarts House'] == house]
-        num_df = tools.select_features(df, dropna=True)
-        houses_dfs[house] = scaler.fit_transform(num_df)
+        houses_dfs[house] = tools.select_features(df, dropna=True)
     fig, axes = plt.subplots(4, 4, figsize=(15, 10))
     fig.suptitle('All features distribution')
     fig.tight_layout()
