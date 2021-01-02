@@ -23,5 +23,5 @@ if __name__ == '__main__':
         sns.distplot(houses_dfs['Ravenclaw'][feature], label='Ravenclaw', bins=25, color='blue')
         sns.distplot(houses_dfs['Hufflepuff'][feature], label='Hufflepuff', bins=25, color='yellow')
         plt.legend()
-    plt.savefig('hist.png')
-    print('Histograms saved to hist.png.')
+    plt.savefig('imgs/hist.png')
+    print('Histograms saved to imgs/hist.png.')

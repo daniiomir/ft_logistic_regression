@@ -18,5 +18,5 @@ if __name__ == '__main__':
     sns.scatterplot(x=houses_dfs['Ravenclaw']['Astronomy'], y=houses_dfs['Ravenclaw']['Defense Against the Dark Arts'], label='Ravenclaw', color='blue')
     sns.scatterplot(x=houses_dfs['Hufflepuff']['Astronomy'], y=houses_dfs['Hufflepuff']['Defense Against the Dark Arts'], label='Hufflepuff', color='yellow')
     plt.legend()
-    plt.savefig('scatter.png')
-    print('Histograms saved to scatter.png.')
+    plt.savefig('imgs/scatter.png')
+    print('Histograms saved to imgs/scatter.png.')
