@@ -1,6 +1,30 @@
 import pickle
 import argparse
 import pandas as pd
+import numpy as np
+
+
+class StandartScaler:
+    def __init__(self):
+        self.mean = {}
+        self.std = {}
+
+    def _fit(self, data):
+        for col in data.columns:
+            self.mean[col] = np.mean(data[col].values)
+            self.std[col] = np.std(data[col].values, ddof=1)
+
+    def _scale(self, value, mean, std):
+        return (value - mean) / std
+
+    def fit_transform(self, data):
+        self._fit(data)
+        return self.transform(data)
+
+    def transform(self, data):
+        for col in data.columns:
+            data[col] = data[col].apply(self._scale, mean=self.mean[col], std=self.std[col])
+        return data
 
 
 def parse_args_describe():
