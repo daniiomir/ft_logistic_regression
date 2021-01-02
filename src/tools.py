@@ -14,7 +14,7 @@ class StandartScaler:
         for col in data.columns:
             self.mean[col] = np.mean(data[col].values)
             self.std[col] = np.std(data[col].values, ddof=1)
-        self.columns = data.columns
+        self.columns = data.columns.to_list()
         self.columns.sort()
 
     def _scale(self, value, mean, std):
@@ -28,9 +28,10 @@ class StandartScaler:
 
     def transform(self, data):
         if isinstance(data, pd.DataFrame):
-            cols = data.columns
+            cols = data.columns.to_list()
             cols.sort()
             if cols == self.columns:
+                data = data.copy()
                 for col in data.columns:
                     data[col] = data[col].apply(self._scale, mean=self.mean[col], std=self.std[col])
                 return data
@@ -38,10 +39,14 @@ class StandartScaler:
         raise Exception('Passed argument should be pandas dataframe.')
 
 
-def select_features(dataset, numeric=True):
+def select_features(dataset, numeric=True, dropna=False):
     if numeric:
-        return dataset.select_dtypes(include=[np.number])
-    return dataset.select_dtypes(include=['object'])
+        df = dataset.select_dtypes(include=[np.number])
+    else:
+        df = dataset.select_dtypes(include=['object'])
+    if dropna:
+        df = df.dropna()
+    return df
 
 
 def describe(dataset):
@@ -67,7 +72,7 @@ def describe(dataset):
     return df.set_index(' ').T.to_string()
 
 
-def parse_args_describe():
+def parse_args_dataset():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_path', default='datasets/dataset_train.csv')
     args = parser.parse_args()
