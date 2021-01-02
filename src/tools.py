@@ -6,6 +6,7 @@ import numpy as np
 
 class StandartScaler:
     def __init__(self):
+        self.columns = []
         self.mean = {}
         self.std = {}
 
@@ -13,18 +14,57 @@ class StandartScaler:
         for col in data.columns:
             self.mean[col] = np.mean(data[col].values)
             self.std[col] = np.std(data[col].values, ddof=1)
+        self.columns = data.columns
+        self.columns.sort()
 
     def _scale(self, value, mean, std):
         return (value - mean) / std
 
     def fit_transform(self, data):
-        self._fit(data)
-        return self.transform(data)
+        if isinstance(data, pd.DataFrame):
+            self._fit(data)
+            return self.transform(data)
+        raise Exception('Passed argument should be pandas dataframe.')
 
     def transform(self, data):
-        for col in data.columns:
-            data[col] = data[col].apply(self._scale, mean=self.mean[col], std=self.std[col])
-        return data
+        if isinstance(data, pd.DataFrame):
+            cols = data.columns
+            cols.sort()
+            if cols == self.columns:
+                for col in data.columns:
+                    data[col] = data[col].apply(self._scale, mean=self.mean[col], std=self.std[col])
+                return data
+            raise Exception('Dataframe columns are not equal to previous.')
+        raise Exception('Passed argument should be pandas dataframe.')
+
+
+def select_features(dataset, numeric=True):
+    if numeric:
+        return dataset.select_dtypes(include=[np.number])
+    return dataset.select_dtypes(include=['object'])
+
+
+def describe(dataset):
+    columns = [' ', 'Count', 'Nan', 'Not nan', 'Mean', 'Std', 'Min', '25%', '50%', '75%', 'Max']
+    df = pd.DataFrame(columns=columns)
+    dataset = select_features(dataset)
+    for column in dataset.columns:
+        user_dict = {i: 0 for i in columns}
+        column_array = np.sort(dataset[column].values)
+        user_dict[' '] = column
+        user_dict['Count'] = column_array.shape[0]
+        user_dict['Nan'] = np.count_nonzero(np.isnan(column_array))
+        user_dict['Not nan'] = np.count_nonzero(~np.isnan(column_array))
+        column_array = column_array[~np.isnan(column_array)]
+        user_dict['Mean'] = np.mean(column_array)
+        user_dict['Std'] = np.std(column_array, ddof=1)
+        user_dict['Min'] = column_array.astype(np.float64).min()
+        user_dict['25%'] = np.percentile(column_array, q=25, interpolation='nearest')
+        user_dict['50%'] = np.percentile(column_array, q=50, interpolation='nearest')
+        user_dict['75%'] = np.percentile(column_array, q=75, interpolation='nearest')
+        user_dict['Max'] = column_array.astype(np.float64).max()
+        df = pd.concat([df, pd.DataFrame([user_dict])])
+    return df.set_index(' ').T.to_string()
 
 
 def parse_args_describe():
