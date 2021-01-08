@@ -83,6 +83,7 @@ def parse_args_train():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_path', default='datasets/dataset_train.csv')
     parser.add_argument('--save_model_path', default='model.pkl')
+    parser.add_argument('--save_scaler_path', default='scaler.pkl')
     args = parser.parse_args()
     return args.__dict__
 
@@ -91,6 +92,7 @@ def parse_args_test():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_path', default='datasets/dataset_test.csv')
     parser.add_argument('--load_model_path', default='model.pkl')
+    parser.add_argument('--load_scaler_path', default='scaler.pkl')
     args = parser.parse_args()
     return args.__dict__
 
@@ -100,12 +102,12 @@ def read_dataset(path):
     return dataset
 
 
-def save_model(model, path):
+def save(obj, path):
     with open(path, 'wb') as f:
-        pickle.dump(model, f, protocol=4)
+        pickle.dump(obj, path, protocol=4)
 
 
-def load_model(path):
+def load(path):
     with open(path, 'rb') as f:
-        model = pickle.load(f)
-    return model
+        obj = pickle.load(f)
+    return obj
