@@ -4,19 +4,18 @@ import matplotlib.pyplot as plt
 
 
 class MultiClassLogisticRegression:
-    def __init__(self, eta=0.1, solver='', n_iter=100, thres=1e-3, random_state=42, verbose=False):
+    def __init__(self, eta=0.1, n_iter=100, thres=1e-3, random_state=42, verbose=False):
         self.n_iter = n_iter
         self.thres = thres
         self.eta = eta
         self.verbose = verbose
-        self.solver = solver
         self.loss = []
         self.classes = None
         self.class_labels = None
         self.weights = None
         np.random.seed(random_state)
 
-    def fit(self, X, y, batch_size=64):
+    def fit(self, X, y):
         self.classes = np.unique(y)
         self.class_labels = {c: i for i, c in enumerate(self.classes)}
         X = self.add_bias(X)
@@ -24,9 +23,7 @@ class MultiClassLogisticRegression:
         self.weights = np.zeros(shape=(len(self.classes), X.shape[1]))
         for epoch in range(self.n_iter):
             self.loss.append(self.cross_entropy(y, self.predict_(X)))
-            idx = np.random.choice(X.shape[0], batch_size)
-            X_batch, y_batch = X[idx], y[idx]
-            update = self.eta * np.dot((y_batch - self.predict_(X_batch)).T, X_batch)
+            update = self.eta * np.dot((y - self.predict_(X)).T, X)
             self.weights += update
             if np.abs(update).max() < self.thres:
                 break
