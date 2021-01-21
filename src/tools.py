@@ -10,7 +10,7 @@ class StandartScaler:
         self.mean = {}
         self.std = {}
 
-    def _fit(self, data):
+    def _fit(self, data: pd.DataFrame):
         for col in data.columns:
             self.mean[col] = np.mean(data[col].values)
             self.std[col] = np.std(data[col].values, ddof=1)
@@ -20,26 +20,22 @@ class StandartScaler:
     def _scale(self, value, mean, std):
         return (value - mean) / std
 
-    def fit_transform(self, data):
-        if isinstance(data, pd.DataFrame):
-            self._fit(data)
-            return self.transform(data)
-        raise Exception('Passed argument should be pandas dataframe.')
+    def fit_transform(self, data: pd.DataFrame):
+        self._fit(data)
+        return self.transform(data)
 
-    def transform(self, data):
-        if isinstance(data, pd.DataFrame):
-            cols = data.columns.to_list()
-            cols.sort()
-            if cols == self.columns:
-                data = data.copy()
-                for col in data.columns:
-                    data[col] = data[col].apply(self._scale, mean=self.mean[col], std=self.std[col])
-                return data
-            raise Exception('Dataframe columns are not equal to previous.')
-        raise Exception('Passed argument should be pandas dataframe.')
+    def transform(self, data: pd.DataFrame):
+        cols = data.columns.to_list()
+        cols.sort()
+        if cols == self.columns:
+            data = data.copy()
+            for col in data.columns:
+                data[col] = data[col].apply(self._scale, mean=self.mean[col], std=self.std[col])
+            return data
+        raise Exception('Dataframe columns are not equal to previous.')
 
 
-def select_features(dataset, numeric=True, dropna=False):
+def select_features(dataset: pd.DataFrame, numeric: bool = True, dropna: bool = False):
     if numeric:
         df = dataset.select_dtypes(include=[np.number])
     else:
@@ -49,7 +45,7 @@ def select_features(dataset, numeric=True, dropna=False):
     return df
 
 
-def describe(dataset):
+def describe(dataset: pd.DataFrame):
     columns = [' ', 'Count', 'Nan', 'Not nan', 'Mean', 'Std', 'Min', '25%', '50%', '75%', 'Max']
     df = pd.DataFrame(columns=columns)
     dataset = select_features(dataset)
@@ -99,17 +95,17 @@ def parse_args_test():
     return args.__dict__
 
 
-def read_dataset(path):
+def read_dataset(path: str):
     dataset = pd.read_csv(path, index_col='Index')
     return dataset
 
 
-def save(obj, path):
+def save(obj: object, path: str):
     with open(path, 'wb') as f:
         pickle.dump(obj, f, protocol=4)
 
 
-def load(path):
+def load(path: str):
     with open(path, 'rb') as f:
         obj = pickle.load(f)
     return obj
