@@ -1,10 +1,11 @@
 import numpy as np
 import src.tools as tools
-from src.model import LogisticRegression
+from src.model import LogisticRegression, OneVSAllClassifier
 
 if __name__ == '__main__':
     args = tools.parse_args_train()
     scaler = tools.StandartScaler()
+    encoder = tools.LabelEncoder()
 
     dataset = tools.read_dataset(args['dataset_path'])
 
@@ -16,13 +17,20 @@ if __name__ == '__main__':
     X = X_y_df.drop(['Hogwarts House'], axis=1)
     y = X_y_df['Hogwarts House']
 
-    X_scaled = scaler.fit_transform(X)
-    model = LogisticRegression(eta=0.1, n_iter=100, verbose=True)
-    X_scaled, y = X_scaled.to_numpy(), y.to_numpy()
+    X_scaled = scaler.fit_transform(X).to_numpy()
+    y = encoder.fit_transform(y)
+
+    if args['clf'] == 'multiclass':
+        model = LogisticRegression(eta=0.001, multiclass=True, n_iter=100, verbose=True)
+        y = tools.one_hot_encoding(y)
+    elif args['clf'] == 'onevsall':
+        model = OneVSAllClassifier(algo=LogisticRegression)
+    else:
+        raise NotImplementedError
+
     model.fit(X_scaled, y)
     print(f'Accuracy for training part - {model.score(X_scaled, y)}')
 
     model.loss_plot()
-    tools.save(model, args['save_weights_path'])  # !!!
-    tools.save(scaler, args['save_scaler_path'])
+    tools.save((scaler, encoder), args['save_tools_path'])
     tools.save(model, args['save_model_path'])

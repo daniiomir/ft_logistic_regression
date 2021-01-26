@@ -4,6 +4,35 @@ import pandas as pd
 import numpy as np
 
 
+class LabelEncoder:
+    def __init__(self):
+        self.mapping = None
+
+    def _fit(self, targets: np.ndarray):
+        classes = np.unique(targets)
+        self.mapping = {classes[i]: i for i in range(len(classes))}
+
+    def fit_transform(self, targets: np.ndarray):
+        self._fit(targets)
+        return self.transform(targets)
+
+    def transform(self, targets: np.ndarray):
+        if self.mapping is not None:
+            encoded = np.zeros(targets.shape, dtype=int)
+            for k, v in self.mapping.items():
+                encoded[targets == k] = v
+            return encoded
+        raise Exception('You should do fit_transform first!')
+
+    def reverse_transform(self, reversed_targets: np.ndarray):
+        if self.mapping is not None:
+            targets = np.zeros(reversed_targets.shape, dtype=int)
+            for k, v in self.mapping.items():
+                targets[reversed_targets == v] = k
+            return targets
+        raise Exception('You should do fit_transform first!')
+
+
 class StandartScaler:
     def __init__(self):
         self.columns = []
@@ -33,6 +62,12 @@ class StandartScaler:
                 data[col] = data[col].apply(self._scale, mean=self.mean[col], std=self.std[col])
             return data
         raise Exception('Dataframe columns are not equal to previous.')
+
+
+def one_hot_encoding(y):
+    labels = np.unique(y)
+    mapping = {labels[i]: i for i in range(len(labels))}
+    return np.eye(len(labels))[np.vectorize(lambda c: mapping[c])(y).reshape(-1)]
 
 
 def select_features(dataset: pd.DataFrame, numeric: bool = True, dropna: bool = False):
@@ -78,9 +113,9 @@ def parse_args_dataset():
 def parse_args_train():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_path', default='datasets/dataset_train.csv')
+    parser.add_argument('--clf', default='onevsall')
     parser.add_argument('--save_model_path', default='model.pkl')
-    parser.add_argument('--save_weights_path', default='weights.pkl')
-    parser.add_argument('--save_scaler_path', default='scaler.pkl')
+    parser.add_argument('--save_tools_path', default='tools.pkl')
     args = parser.parse_args()
     return args.__dict__
 
@@ -89,8 +124,7 @@ def parse_args_test():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_path', default='datasets/dataset_test.csv')
     parser.add_argument('--load_model_path', default='model.pkl')
-    parser.add_argument('--load_weights_path', default='weights.pkl')
-    parser.add_argument('--load_scaler_path', default='scaler.pkl')
+    parser.add_argument('--load_tools_path', default='tools.pkl')
     args = parser.parse_args()
     return args.__dict__
 

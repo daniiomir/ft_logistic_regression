@@ -5,9 +5,8 @@ import src.tools as tools
 
 if __name__ == '__main__':
     args = tools.parse_args_test()
-    scaler = tools.load(args['load_scaler_path'])
+    scaler, encoder = tools.load(args['load_tools_path'])
     model = tools.load(args['load_model_path'])
-    model.load_weights(args['load_weights_path'])
 
     dataset = tools.read_dataset(args['dataset_path'])
 
@@ -18,7 +17,8 @@ if __name__ == '__main__':
     X = X_y_df.drop(['Hogwarts House'], axis=1)
 
     X_scaled = scaler.transform(X)
-    preds = model.predict_classes(X_scaled.to_numpy())
+    preds = model.predict(X_scaled.to_numpy())
+    preds = encoder.reverse_transform(preds)
     preds_df = pd.DataFrame(data=preds, columns=['Hogwarts House'])
 
     preds_df.index.name = 'Index'
