@@ -21,10 +21,9 @@ if __name__ == '__main__':
     y = encoder.fit_transform(y)
 
     if args['clf'] == 'multiclass':
-        model = LogisticRegression(eta=0.001, multiclass=True, n_iter=100, verbose=True)
-        y = tools.one_hot_encoding(y)
-    elif args['clf'] == 'onevsall':
-        model = OneVSAllClassifier(algo=LogisticRegression)
+        model = LogisticRegression(eta=0.001, multiclass=True, n_iter=100, verbose=True, verbose_epoch=1)
+    elif args['clf'] == 'ova':
+        model = OneVSAllClassifier(algo=LogisticRegression, eta=0.1, n_iter=50, verbose=True, verbose_epoch=1)
     else:
         raise NotImplementedError
 

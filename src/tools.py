@@ -26,7 +26,7 @@ class LabelEncoder:
 
     def reverse_transform(self, reversed_targets: np.ndarray):
         if self.mapping is not None:
-            targets = np.zeros(reversed_targets.shape, dtype=int)
+            targets = np.zeros(reversed_targets.shape, dtype=object)
             for k, v in self.mapping.items():
                 targets[reversed_targets == v] = k
             return targets
@@ -113,7 +113,7 @@ def parse_args_dataset():
 def parse_args_train():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_path', default='datasets/dataset_train.csv')
-    parser.add_argument('--clf', default='onevsall')
+    parser.add_argument('--clf', default='ova')
     parser.add_argument('--save_model_path', default='model.pkl')
     parser.add_argument('--save_tools_path', default='tools.pkl')
     args = parser.parse_args()
