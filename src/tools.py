@@ -114,8 +114,8 @@ def parse_args_train():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_path', default='datasets/dataset_train.csv')
     parser.add_argument('--clf', default='ova')
-    parser.add_argument('--save_model_path', default='model.pkl')
-    parser.add_argument('--save_tools_path', default='tools.pkl')
+    parser.add_argument('--save_model_path', default='tmp/model.pkl')
+    parser.add_argument('--save_tools_path', default='tmp/tools.pkl')
     args = parser.parse_args()
     return args.__dict__
 
@@ -123,8 +123,8 @@ def parse_args_train():
 def parse_args_test():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_path', default='datasets/dataset_test.csv')
-    parser.add_argument('--load_model_path', default='model.pkl')
-    parser.add_argument('--load_tools_path', default='tools.pkl')
+    parser.add_argument('--load_model_path', default='tmp/model.pkl')
+    parser.add_argument('--load_tools_path', default='tmp/tools.pkl')
     args = parser.parse_args()
     return args.__dict__
 

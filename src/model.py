@@ -39,19 +39,21 @@ class OneVSAllClassifier:
         plt.xlabel("Number of iterations")
         plt.ylabel("Loss")
         plt.legend(loc='best')
-        plt.savefig('loss_plot.png')
+        plt.savefig('imgs/loss_plot.png')
 
 
 class LogisticRegression:
     def __init__(self, eta: float = 0.1, multiclass: bool = False, n_iter: int = 100,
                  update_weights_thres: float = 1e-3, random_state: int = 42,
-                 verbose: bool = False, verbose_epoch: int = 10, decision_thres: float = 0.5):
+                 verbose: bool = False, verbose_epoch: int = 10, decision_thres: float = 0.5,
+                 l1_ratio: float = 3.):
         self.n_iter = n_iter
         self.update_weights_thres = update_weights_thres
         self.decision_thres = decision_thres
         self.eta = eta
         self.verbose = verbose
         self.verbose_epoch = verbose_epoch
+        self.l1_ratio = l1_ratio
         self.loss = []
         self.multiclass = multiclass
         self.weights = None
@@ -87,7 +89,7 @@ class LogisticRegression:
         plt.title("Development of loss during training")
         plt.xlabel("Number of iterations")
         plt.ylabel("Loss")
-        plt.savefig('loss_plot.png')
+        plt.savefig('imgs/loss_plot.png')
 
     def _fit(self, x, y):
         if not self.multiclass:
@@ -98,13 +100,14 @@ class LogisticRegression:
         for epoch in range(self.n_iter):
             self.loss.append(self.cross_entropy(y, self.predict_proba(x, add_bias=False)))
             if not self.multiclass:
-                update = self.eta * np.dot(x.T, (y - self.predict_proba_binary_(x)))
+                update = self.eta * (np.dot(x.T, (y - self.predict_proba_binary_(x))) + self.l1_ratio * np.sign(self.weights))
             else:
-                update = self.eta * np.dot((y - self.predict_proba_multi_(x)).T, x)
+                update = self.eta * (np.dot((y - self.predict_proba_multi_(x)).T, x) + self.l1_ratio * np.sign(self.weights))
             self.weights += update
-            if epoch % self.verbose_epoch == 0 and self.verbose:
+            if (epoch % self.verbose_epoch == 0 or epoch + 1 == self.n_iter) and self.verbose:
                 print(f'[{epoch}] Loss - {self.loss[-1]}, accuracy - {self.eval(x, y)}')
             if np.abs(update).max() < self.update_weights_thres:
+                print('Update is too low. Break')
                 break
 
     def add_bias(self, x):
