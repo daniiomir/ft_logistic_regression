@@ -24,3 +24,4 @@ if __name__ == '__main__':
 
     preds_df.index.name = 'Index'
     preds_df.to_csv('houses.csv')
+    print('Prediction saved to houses.csv')

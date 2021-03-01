@@ -80,11 +80,52 @@ def select_features(dataset: pd.DataFrame, numeric: bool = True, dropna: bool = 
     return df
 
 
+def _mean(x: np.ndarray):
+    return np.sum(x) / x.shape[0]
+
+
+def _std(x: np.ndarray):
+    mean = _mean(x)
+    total = 0
+    for _ in x:
+        total += (_ - mean) ** 2
+    return (total / (x.shape[0] - 1)) ** 0.5
+
+
+def _min(x: np.ndarray):
+    min_value = x[0]
+    for _ in x:
+        if _ < min_value:
+            min_value = _
+    return min_value
+
+
+def _max(x: np.ndarray):
+    max_value = x[0]
+    for _ in x:
+        if _ > max_value:
+            max_value = _
+    return max_value
+
+
+def _percentile(x, p):
+    k = (x.shape[0] - 1) * (p / 100)
+    f = np.floor(k)
+    c = np.ceil(k)
+    if f == c:
+        return x[int(k)]
+    d0 = x[int(f)] * (c - k)
+    d1 = x[int(c)] * (k - f)
+    return d0 + d1
+
+
 def describe(dataset: pd.DataFrame):
     columns = [' ', 'Count', 'Nan', 'Not nan', 'Mean', 'Std', 'Min', '25%', '50%', '75%', 'Max']
     df = pd.DataFrame(columns=columns)
     dataset = select_features(dataset)
     for column in dataset.columns:
+        if np.isnan(dataset[column]).all():
+            continue
         user_dict = {i: 0 for i in columns}
         column_array = np.sort(dataset[column].values)
         user_dict[' '] = column
@@ -92,13 +133,13 @@ def describe(dataset: pd.DataFrame):
         user_dict['Nan'] = np.count_nonzero(np.isnan(column_array))
         user_dict['Not nan'] = np.count_nonzero(~np.isnan(column_array))
         column_array = column_array[~np.isnan(column_array)]
-        user_dict['Mean'] = np.mean(column_array)
-        user_dict['Std'] = np.std(column_array, ddof=1)
-        user_dict['Min'] = column_array.astype(np.float64).min()
-        user_dict['25%'] = np.percentile(column_array, q=25, interpolation='nearest')
-        user_dict['50%'] = np.percentile(column_array, q=50, interpolation='nearest')
-        user_dict['75%'] = np.percentile(column_array, q=75, interpolation='nearest')
-        user_dict['Max'] = column_array.astype(np.float64).max()
+        user_dict['Mean'] = _mean(column_array)
+        user_dict['Std'] = _std(column_array)
+        user_dict['Min'] = _min(column_array.astype(np.float64))
+        user_dict['25%'] = _percentile(column_array, 25)
+        user_dict['50%'] = _percentile(column_array, 50)
+        user_dict['75%'] = _percentile(column_array, 75)
+        user_dict['Max'] = _max(column_array.astype(np.float64))
         df = pd.concat([df, pd.DataFrame([user_dict])])
     return df.set_index(' ').T.to_string()
 
