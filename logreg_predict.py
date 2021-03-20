@@ -12,13 +12,15 @@ if __name__ == '__main__':
 
     remove_features = ['Defense Against the Dark Arts', 'Arithmancy', 'Care of Magical Creatures', 'Flying']
     dataset = dataset.drop(remove_features, axis=1)
-    selected_features = dataset.select_dtypes(include=[np.number]).columns
+    selected_features = dataset.select_dtypes(include=[np.number]).columns.to_list() + ['Best Hand']
     X_y_df = dataset[selected_features]
-    X = X_y_df.drop(['Hogwarts House'], axis=1)
+
+    X_cat = pd.get_dummies(X_y_df['Best Hand'])
+    X_num = scaler.transform(X_y_df.drop(['Best Hand', 'Hogwarts House'], axis=1))
+    X = pd.concat([X_num, X_cat], axis=1)
     X.fillna(0, inplace=True)
 
-    X_scaled = scaler.transform(X)
-    preds = model.predict(X_scaled.to_numpy())
+    preds = model.predict(X.to_numpy())
     preds = encoder.reverse_transform(preds)
     preds_df = pd.DataFrame(data=preds, columns=['Hogwarts House'])
 

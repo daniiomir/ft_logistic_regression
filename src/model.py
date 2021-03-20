@@ -100,12 +100,12 @@ class LogisticRegression:
         for epoch in range(self.n_iter):
             self.loss.append(self.cross_entropy(y, self.predict_proba(x, add_bias=False)))
             if not self.multiclass:
-                update = self.eta * (np.dot(x.T, (y - self.predict_proba_binary_(x))) +
+                update = self.eta * (np.dot(x.T, (self.predict_proba_binary_(x) - y)) +
                                      self.l1_ratio * np.sign(self.weights))
             else:
-                update = self.eta * (np.dot((y - self.predict_proba_multi_(x)).T, x) +
+                update = self.eta * (np.dot(x.T, (self.predict_proba_multi_(x) - y)).T +
                                      self.l1_ratio * np.sign(self.weights))
-            self.weights += update
+            self.weights -= update
             if (epoch % self.verbose_epoch == 0 or epoch + 1 == self.n_iter) and self.verbose:
                 print(f'[{epoch}] Loss - {self.loss[-1]}, accuracy - {self.eval(x, y)}')
             if np.abs(update).max() < self.update_weights_thres:
@@ -128,7 +128,7 @@ class LogisticRegression:
         return -1 * np.mean(y_true * np.log(y_pred))
 
     def predict_proba_binary_(self, x):
-        return self.sigmoid(np.dot(x, self.weights.T))
+        return self.sigmoid(np.dot(x, self.weights))
 
     def predict_proba_multi_(self, x):
         return self.softmax(np.dot(x, self.weights.T).reshape(-1, self.class_count))

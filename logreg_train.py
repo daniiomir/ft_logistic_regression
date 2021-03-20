@@ -1,3 +1,4 @@
+import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -21,15 +22,18 @@ if __name__ == '__main__':
     plt.close()
 
     remove_features = ['Defense Against the Dark Arts', 'Arithmancy', 'Care of Magical Creatures', 'Flying']
-    selected_features = dataset.select_dtypes(include=[np.number]).columns.to_list() + ['Hogwarts House']
+    selected_features = dataset.select_dtypes(include=[np.number]).columns.to_list() + ['Hogwarts House', 'Best Hand']
     X_y_df = dataset[selected_features]
     X_y_df = X_y_df.drop(remove_features, axis=1)
     X_y_df.dropna(inplace=True)
-    X = X_y_df.drop(['Hogwarts House'], axis=1)
-    X.fillna(0, inplace=True)
+
+    X_num = X_y_df.drop(['Hogwarts House', 'Best Hand'], axis=1)
+    X_num = scaler.fit_transform(X_num)
+    X_cat = pd.get_dummies(X_y_df['Best Hand'])
+    X = pd.concat([X_num, X_cat], axis=1)
+    X = X.to_numpy()
     y = X_y_df['Hogwarts House']
 
-    X_scaled = scaler.fit_transform(X).to_numpy()
     y = encoder.fit_transform(y)
 
     model_args = {
@@ -37,7 +41,7 @@ if __name__ == '__main__':
         'n_iter': 100,
         'verbose': True,
         'verbose_epoch': 10,
-        'decision_thres': 0.6,
+        'decision_thres': 0.5,
         'l1_ratio': 0.1
     }
 
@@ -48,8 +52,8 @@ if __name__ == '__main__':
     else:
         raise NotImplementedError
 
-    model.fit(X_scaled, y)
-    print(f'Accuracy for training part - {model.score(X_scaled, y)}')
+    model.fit(X, y)
+    print(f'Accuracy for training part - {model.score(X, y)}')
 
     model.loss_plot()
     tools.save((scaler, encoder), args['save_tools_path'])
