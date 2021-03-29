@@ -120,7 +120,7 @@ def _percentile(x, p):
 
 
 def describe(dataset: pd.DataFrame):
-    columns = [' ', 'Count', 'Nan', 'Not nan', 'Mean', 'Std', 'Min', '25%', '50%', '75%', 'Max']
+    columns = [' ', 'Count', 'Mean', 'Std', 'Min', '25%', '50%', '75%', 'Max']
     df = pd.DataFrame(columns=columns)
     dataset = select_features(dataset)
     for column in dataset.columns:
@@ -130,8 +130,6 @@ def describe(dataset: pd.DataFrame):
         column_array = np.sort(dataset[column].values)
         user_dict[' '] = column
         user_dict['Count'] = column_array.shape[0]
-        user_dict['Nan'] = np.count_nonzero(np.isnan(column_array))
-        user_dict['Not nan'] = np.count_nonzero(~np.isnan(column_array))
         column_array = column_array[~np.isnan(column_array)]
         user_dict['Mean'] = _mean(column_array)
         user_dict['Std'] = _std(column_array)

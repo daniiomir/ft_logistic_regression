@@ -131,7 +131,7 @@ class LogisticRegression:
         return self.sigmoid(np.dot(x, self.weights))
 
     def predict_proba_multi_(self, x):
-        return self.softmax(np.dot(x, self.weights.T).reshape(-1, self.class_count))
+        return self.softmax(np.dot(x, self.weights.T))
 
     def eval(self, x, y):
         if not self.multiclass:
